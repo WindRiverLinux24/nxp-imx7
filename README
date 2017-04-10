@@ -1,0 +1,402 @@
+i.MX7D Sabre Board Support Package
+
+1. About this document
+======================
+This document describes common and non-hardware specific information.
+Please refer to README.hardware for hardware specific information.
+
+Dependencies
+------------
+This layer depends on the oe-core version supplied with Wind River
+Linux and the wr-kernel layer.
+
+Maintenance
+-----------
+This layer is maintained by Wind River Systems, Inc.
+Contact <support@windriver.com> or your support representative for more
+information on submitting changes.
+
+Building the nxp-imx7 layer
+---------------------------
+This layer and wr-kernel layer should be added to bblayers.conf. This
+is done automatically when using the Wind River configure wrapper.
+
+License
+-------
+Copyright (C) 2017 Wind River Systems, Inc.
+
+The right to copy, distribute or otherwise make use of this software may
+be licensed only pursuant to the terms of an applicable Wind River license
+agreement. No license to Wind River intellectual properly rights is granted
+herein. All rights not licensed by Wind River are reserved by Wind River.
+
+Source code included in tree for individual recipes is under the LICENSE
+stated in each recipe (.bb file) unless other stated.
+
+2. BSP Kernel and RootFS Combination
+====================================
+
+The validity of WindRiver Linux kernel and RootFS combination for this BSP is
+in the table.
+The leftmost column of the table is the kernel type, and the top line is the
+RootFS type.
+'Y' in each content cell stands for the combination is supported; 'N' stands
+for not supported:
+
+--------------------------------------------------------------------
+| kernel/rootfs | glibc_std | glibc_small | glibc_cgl | glibc_tiny |
+--------------------------------------------------------------------
+|   standard    |     Y     |      Y      |     N     |     N      |
+--------------------------------------------------------------------
+|   preempt_rt  |     Y     |      Y      |     N     |     N      |
+--------------------------------------------------------------------
+|   cgl         |     N     |      N      |     N     |     N      |
+--------------------------------------------------------------------
+
+Note: with regard to the kernel and RootFS type, please refer to WindRiver Linux
+specification for details.
+
+3. Board Specific Patches
+=========================
+To get a list of patches applied to the kernel specific to this BSP along
+with patch descriptions use git-whatchanged on the default kernel. For example:
+
+	# cd bitbake_build/tmp/work-shared/nxp-imx7/kernel-source
+	# git whatchanged standard/base..
+
+
+4. Boot Instructions
+====================
+
+4.1 MMC/SD Boot
+---------------
+
+4.1.1 Create partitions
+-----------------------
+You can use bootloader/create-sdcard.sh to fastly create partitions:
+
+	sudo ./create-sdcard.sh /dev/${your sdcard}
+
+Or you can manually create partitions as follow:
+
+(1) To identify the device node assigned to the SD/MMC card, enter the command:
+
+	# cat /proc/partitions
+	major minor	  #blocks name
+	8	0	 78125000 sda
+	8	1	 75095811 sda1
+	8	2	        1 sda2
+	8	5	  3028221 sda5
+	8	32	488386584 sdc
+	8	33	488386552 sdc1
+	8	16	  3921920 sdb
+	8	18	  3905535 sdb1
+
+In this example, the device node assigned is /dev/sdb.
+
+(2) Create partitions on the MMC/SD card.
+
+Run the following shell script with sudo to create a partition,
+you need umount your sdcard if it has been mount.
+
+	#!/bin/bash
+
+	#please input you sdcard device name, for example /dev/sdb
+	DRIVE=""
+
+	dd if=/dev/zero of=$DRIVE bs=1024 count=1024
+	SIZE=`fdisk -l $DRIVE | grep Disk | awk '{print $5}'`
+	echo DISK SIZE - $SIZE bytes
+	CYLINDERS=`echo $SIZE/255/63/512 | bc`
+	sfdisk -D -H 255 -S 63 -C $CYLINDERS $DRIVE << EOF
+	1,12,0x0C,*
+	13,,,-
+	EOF
+
+Suppose the device node for MMC/SD card on the host machine is /dev/sdb.
+
+Note: The first 8MB can be reserved for MBR, bootloader, and kernel sections,
+the rootfs partition should be located after kernel image.
+
+(3) Create a filesystem on the first partition.
+
+Format it with vfat:
+
+	# mkfs.vfat /dev/sdb1
+
+(4) Create a filesystem on the second partition.
+
+Format it with one of the most popular filesystem types supported by Linux,
+for instance, ext3.
+
+	# mkfs.ext3 /dev/sdb2
+
+4.1.2 Decompress MMC/SD root filesystem
+---------------------------------------
+
+mount it and deploy the root filesystem image there:
+
+	# mkdir /mnt/sd
+	# mount /dev/sdb2 /mnt/sd
+	# cd <buildprj>/export/
+	# tar -C /mnt/sd -jxf nxp-imx7-wrlinux-image-glibc-std-standard-dist.tar.bz2 --numeric-owner
+
+
+4.1.3 Deploy u-boot, dtb and kernel to SD/MMC
+----------------------------------------------
+
+(1) Copying the Boot Loader Image
+
+Enter the following command to copy the U-Boot image to the SD/MMC card:
+
+	# sudo dd if=u-boot-mx7d-${board name}.imx of=/dev/sdb bs=512 seek=2 conv=fsync
+
+This assumes a pre-build U-Boot image delivered with the BSP or built from
+the U-Boot source code. The first 1 KB of the SD/MMC card, that includes
+the partition table, will be preserved.
+
+The boot modes of the board are controlled by the boot configuration
+DIP switches. To locate the boot configuration switches, see the
+section 4.3.1 of the README.hardware
+
+(2) Copying the Kernel Image and dtb to the SD/MMC
+
+The following command will copy the kernel image to the first partition SD/MMC card:
+
+	# mkdir /mnt/sd
+	# mount -t vfat /dev/sdb1 /mnt/sd
+	# cd <buildprj>/export/
+	# cp -rf nxp-imx7-zImage-x.x.x.x_kernel_type /mnt/sd
+	# cp -rf nxp-imx7-imx7d-sdb.dtb-x.x.x.x_kernel_type /mnt/sd
+
+
+4.1.4 Load kernel from MMC/SD to memory
+---------------------------------------
+Note: all commands in this section are executed in u-boot command line.
+
+Set the active mmc card and partition.
+
+	# mmc dev $disk[:$partition]
+
+For example:
+	# mmc dev 0		/* Activate the mmc0 card */
+
+
+Note that the partition is an optional argument since not all cards can
+support partitions. If your card does not have this capability, do not add
+the partition argument into the command. Currently there is no simple
+non-runtime way to determine if a card supports partitions or not.
+
+
+Then load the dtb and kernel image from the activated MMC/SD card:
+
+	# mmc rescan
+	# fatload mmc $disk:1 0x80800000 nxp-imx7-zImage-x.x.x.x_kernel_type
+	# fatload mmc $disk:1 0x83000000 ${fdt_file}
+
+4.1.5 Set bootargs and boot system
+----------------------------------
+
+	# setenv bootargs console=ttymxc0,115200 root=/dev/mmcblk{N}p${M} rw \
+		 rootwait video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24
+	# bootz
+
+In the bootargs root=/dev/mmcblk{N}p${M}, Both N and M describe the disk
+number and partition number.
+
+
+4.2 NFS Root File System
+------------------------
+
+4.2.1 Prepare Kernel, DTB, NFS and TFTP servers
+-----------------------------------------------
+The files in below example can be found in <buildprj>/export/images and
+are copied to the export directory of the TFTP server.
+
+4.2.2 Download kernel
+---------------------
+
+	# tftp 0x80800000 nxp-imx7-zImage-x.x.x.x_kernel_type
+
+4.2.3 Download dtb
+------------------
+
+	# tftp 0x83000000 nxp-imx7-xxxxxx.dtb-x.x.x.x_kernel_type
+
+4.2.4 Set bootargs and boot system
+----------------------------------
+
+	Note, the spi NOR flash, emmc and NAND flash are not soldered onto the board.
+	Please refer to imx7d sabre Board hardware user's guide for information
+	about how to use them.
+
+	# setenv bootargs console=ttymxc0,115200 root=/dev/nfs rw \
+		 nfsroot=<nfs server>:<nfs root>,v3,tcp \
+		 ip=<target IP>::<gateway>:<netmask>::eth0:off \
+		 video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24
+	# bootz 0x80800000 - 0x83000000
+
+5. Features
+===========
+
+5.1 fbdev HDMI
+--------------
+
+To enable HDMI as the default framebuffer device, please add:
+
+	video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24
+
+in the bootargs parameter of u-boot.
+
+5.2 USB feature
+---------------
+
+5.2.1 USB OTG Usage and verification
+------------------------------------
+
+1. Verify the OTG device mode
+
+Plug in B cable and connect to the host machine.
+
+board configure:
+
+	# ifconfig usb0 192.168.1.10
+
+Host machine configure:
+
+	# sudo ifconfig usb0 192.168.1.100
+	# ping 192.168.1.10 -c 2
+	PING 192.168.1.10 (192.168.1.10) 56(84) bytes of data.
+	64 bytes from 192.168.1.10: icmp_req=1 ttl=64 time=2.06 ms
+	64 bytes from 192.168.1.10: icmp_req=2 ttl=64 time=0.286 ms
+	...
+
+2. Switch to the OTG host mode
+
+Replace the B cable with the A cable.
+
+5.3 Audio
+---------
+
+5.3.1 Audio capture and playback(WM8962)
+----------------------------------------
+
+1. Capture
+
+Set the parameter to fit the codec and then record audio messages:
+
+	# amixer set 'MIXINR IN3R' on
+	# amixer set 'INPGAR IN3R' on
+
+2. Playback
+
+	# amixer cset name='Headphone Volume' 127
+
+5.3.2 Audio HDMI playback
+-------------------------
+
+Connect the board and a HDMI display with a HDMI cable,
+then enable fbdev HDMI as in 4.1 section.
+
+Play the recorded audio messages:
+
+	# aplay -Dhw:1,0 record.wav
+
+5.4 Static PM
+-------------
+
+The debug UART can be set as a wakeup source with:
+	# echo enabled > /sys/class/tty/ttymxc0/power/wakeup
+	# echo mem > /sys/power/state
+
+5.5 CPU frequency
+------------------
+
+The CPU frequency scaling allows the clock speed of the CPU to be
+changed on the fly.
+
+	# echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	# cat /proc/cpuinfo
+
+5.6 Backlight
+--------------
+
+	# echo 1~7 > /sys/class/backlight/backlight/brightness
+
+5.7 ANATOP thermal
+-------------------
+
+	To check current CPU temperature
+	# cd /sys/class/thermal/thermal_zone0
+	# cat temp
+	39000
+	# cat trip_point_0_type
+	passive
+	# cat trip_point_0_temp
+	85000
+	# echo 38500 > trip_point_0_temp
+	the number of "imx_thermal" interrupt will be increased
+
+5.8 PCIe
+--------
+
+Since the PCIe connector on-board only exports PETP0/N0, PERP0/N0 and 3.3V
+pins, any mini-PCIe devices that use other PCIe pins won't be supported.
+The following PCIe peripherals are validated:
+
+	Intel Centrino Advanced-N 6205
+	Intel Centrino Wireless-N 1030
+
+via the following steps:
+
+Simply including in your configure line as follows:
+
+	--enable-kernel=standard+features/iwlwifi/iwlwifi.scc
+
+This will include the iwlwifi and mac80211 kernel modules in
+the root filesystem.
+
+Make the consistency for them(Built and install)
+
+	# make -C build wireless-tools.addpkg
+	# make fs
+
+Copy relevant firmware(Intel 6205 WiFi firmware: iwlwifi-6000g2a-5.ucode)
+of WiFi cards into /lib/firmware of target rootfs.
+
+Execute the following commands to validate WiFi cards:
+
+	# ifconfig wlan0 up
+	# iwconfig wlan0 essid <AP essid>
+	# dhclient wlan0
+	# ping <AP address> -i wlan0 -c 1
+
+Note, the PCIe driver so far does not support hotplug and suspend/resume.
+
+6. kexec/kdump
+==============
+
+For discussion purposes, some useful terminology will be described here.
+
+boot kernel - the first one that you start and supports kexec, from u-boot
+	      for instance
+capture kernel - the kernel that you reboot into after a boot kernel crash
+
+To build the boot kernel, use the following configure option to configure
+the project:
+
+     --with-template=feature/kexec,feature/kdump
+
+To reserve a memory region for capture kernel, you need to pass the bootargs argument "crashkernel"
+as follow:
+
+    crashkernel=256M@2256M
+
+For dump-capture kernel:
+Before boot dump-capture kernel, please add "maxcpus=1" to the boot parameter.
+Note: please use zImage as a secondary kernel. It can be found in the
+  build/linux-windriver/4.1-r0/linux-nxp_imx7-standard-build/arch/arm/boot
+directory.
+
+For more detailed info about kdump, please refer to Documentation/kdump/kdump.txt
+in the kernel source tree.

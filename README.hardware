@@ -1,0 +1,143 @@
+i.MX7D Sabre Board Support Package
+
+
+Table of Contents
+=================
+
+1. Supported Boards
+2. Change History
+3. BSP Features
+4. BSP Notes
+
+1. Supported Boards
+===================
+
+This BSP supports the following boards:
+
+   + I.MX7D SABRE     : Board: MCIMX7SABRE, SCH-28590 REVD1, 700-28590 REVD.
+			 CPU: PCIMX7D rev1.2
+
+2. Change History
+=================
+
+  - 2017/04 (US94972): WRLinux 8.0 RCPL17, support I.MX7D SABRE based on FSL IMX SDK v4.1.15
+
+3. BSP Features
+===============
+
+3.1 Supported Features
+======================
+
+This BSP supports the following features.
+
+  o General Platform
+	+ KGDBoC
+	+ OProfile (timer mode)
+
+  o Bus
+	+ I2C: On-Chip I2C controller
+	+ PCIe: On-Chip PCIe controller
+	+ SPI: Freescale ECSPI bus controller in master mode
+
+  o Network
+	+ Ethernet: FEC 10/100/1000 MAC ethernet controller, BCM54220B0KFBG external PHY
+	+ IEEE 1588: based on FEC controller
+	+ CAN: FLEXCAN, Flexible controller area network
+	+ WIFI/BT: LBEH5HMZPC-TEMP
+
+  o USB
+	+ USB Host: 1 EHCI compatible host controller in the chip
+	+ USB OTG: On-Chip UTMI transceiver, high/full/low speed
+
+  o Storage
+	+ SD/MMC: On-Chip ultra secured digital host controller (uSDHC)
+	+ eMMC: On-chip embedded multimediacard, 1bit/4bit/8bit SDR/DDR mode
+	+ NOR Flash: 64MB mx25l51245g SPI NOR Flash (need HW rework, refer in imx7dsabre SCH)
+
+  o User_Interface_Multimedia
+	+ AUDIO:
+		+ HDMI codec 
+		+ WM8960 codec
+
+	+ Touchscreen: EGALAX touchscreen controller connected via i2C
+	+ Parallel LCD Display
+	+ Backlight
+	+ HDMI: On-Chip HDMI controller
+
+  o Power Mgmt
+	+ Suspend to RAM
+	+ CPU Freq
+	+ Bus Freq
+	+ CPU idle
+
+  o Misc Devices
+	+ UART: On-Chip High-Speed UART
+	+ Watchdog: On-Chip H/W watchdog timer
+	+ GPIO: On-Chip general purpose Input/Output
+	+ RTC: On-Chip secure real time clock
+	+ Sensors: On-Chip temperature sensor
+	+ Power Regulator: ANATOP PMIC power regulator
+	+ SDMA: On-Chip smart direct memory access controller
+	+ PWM: Pulse width modulator
+	+ CAAM (security engine)
+	+ Accelerometer/Magnetometer: FXOS8700CQR1
+	+ Gyroscope: FXAS21002C
+	+ Barometer/Altimeter: MPL3115A2
+
+3.2 Limited Supported Features
+==============================
+
+3.3 Unsupported Features
+========================
+
+The following features are not supported and validated:
+
+	x ESAI card
+	x CortexM4
+	x MIPI-DSI Display 
+	x MIPI-CSI CMOS sensor
+	x EPDC
+	x MikroBUS
+
+4. BSP Notes
+============
+
+4.1 Hardware Description
+------------------------
+
+For complete hardware details please refer to the manual/PDF that should have
+accompanied the board.
+
+
+4.2 Target Notes
+----------------
+
+NOTE: This BSP is only validated in the following environment, if used in a
+different environment it may run into unknown issues.
+
+IMX7D SABRE:
+	CPU:   Freescale i.MX7D rev1.2 996 MHz (running at 792 MHz)
+	CPU:   Commercial temperature grade (0C to 95C) at 32C
+	Reset cause: POR
+	Board: i.MX7D SABRESD RevD
+	BootLoader Version:    U-Boot 2016.03-imx_v2016.03_4.1.15_2.0.0_ga+g0ec2a01 (Mar 13 2017 - 17:27:26 +0800)
+
+Note:
+  If the board's u-boot could not support dtb, please refer to bootloader/README
+to update u-boot.
+
+4.3 Specify boot medium
+-----------------------
+
+4.3.1 IMX7D SABRE (SCH-28590 REVD1, 700-28590 REVD)
+---------------------------------------------------
+
+1. Booting from SD card 
+
+Switch	D1   D2   D3   D4   D5   D6   D7   D8
+SW2	OFF  OFF  ON   OFF  OFF  OFF  ON   OFF
+
+Note:
+Booting from qspi, emmc and NDAD isn't supported in default, it need HW reword, for summary information,
+please refer the board schematics
+
