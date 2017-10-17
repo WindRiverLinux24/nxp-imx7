@@ -19,8 +19,7 @@ This BSP supports the following boards:
 
 2. Change History
 =================
-
-  - 2017/04 (US94972): WRLinux 8.0 RCPL17, support I.MX7D SABRE based on FSL IMX SDK v4.1.15
+  - 2017/11 (US102575): WRLinux 10.0 , support I.MX7D SABRE based on FSL IMX SDK v4.9.15
 
 3. BSP Features
 ===============
