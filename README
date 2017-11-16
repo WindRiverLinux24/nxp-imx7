@@ -61,7 +61,7 @@ specification for details.
 To get a list of patches applied to the kernel specific to this BSP along
 with patch descriptions use git-whatchanged on the default kernel. For example:
 
-	# cd bitbake_build/tmp/work-shared/nxp-imx7/kernel-source
+	# cd tmp-glibc/work-shared/nxp-imx7/kernel-source
 	# git whatchanged standard/base..
 
 
@@ -138,8 +138,8 @@ mount it and deploy the root filesystem image there:
 
 	# mkdir /mnt/sd
 	# mount /dev/sdb2 /mnt/sd
-	# cd <buildprj>/export/
-	# tar -C /mnt/sd -jxf nxp-imx7-wrlinux-image-glibc-std-standard-dist.tar.bz2 --numeric-owner
+	# cd <buildprj>/tmp-glibc/deploy/images/nxp-imx7/
+	# tar -C /mnt/sd -jxf wrlinux-image-glibc-std-nxp-imx7.tar.bz2 --numeric-owner
 
 
 4.1.3 Deploy u-boot, dtb and kernel to SD/MMC
@@ -149,7 +149,7 @@ mount it and deploy the root filesystem image there:
 
 Enter the following command to copy the U-Boot image to the SD/MMC card:
 
-	# sudo dd if=u-boot-mx7d-${board name}.imx of=/dev/sdb bs=512 seek=2 conv=fsync
+	# sudo dd if=u-boot.bin-sd of=/dev/sdb bs=512 seek=2 conv=fsync
 
 This assumes a pre-build U-Boot image delivered with the BSP or built from
 the U-Boot source code. The first 1 KB of the SD/MMC card, that includes
@@ -166,8 +166,8 @@ The following command will copy the kernel image to the first partition SD/MMC c
 	# mkdir /mnt/sd
 	# mount -t vfat /dev/sdb1 /mnt/sd
 	# cd <buildprj>/export/
-	# cp -rf nxp-imx7-zImage-x.x.x.x_kernel_type /mnt/sd
-	# cp -rf nxp-imx7-imx7d-sdb.dtb-x.x.x.x_kernel_type /mnt/sd
+	# cp -rf zImage-nxp-imx7.bin /mnt/sd
+	# cp -rf zImage-imx7d-sdb.dtb /mnt/sd
 
 4.1.4. Creating Partitioned Images(WIC)
 =======================================
@@ -208,8 +208,8 @@ non-runtime way to determine if a card supports partitions or not.
 Then load the dtb and kernel image from the activated MMC/SD card:
 
 	# mmc rescan
-	# fatload mmc $disk:1 0x80800000 nxp-imx7-zImage-x.x.x.x_kernel_type
-	# fatload mmc $disk:1 0x83000000 ${fdt_file}
+	# fatload mmc $disk:1 0x80800000 zImage-nxp-imx7.bin
+	# fatload mmc $disk:1 0x83000000 zImage-imx7d-sdb.dtb
 
 4.1.6 Set bootargs and boot system
 ----------------------------------
@@ -227,18 +227,18 @@ number and partition number.
 
 4.2.1 Prepare Kernel, DTB, NFS and TFTP servers
 -----------------------------------------------
-The files in below example can be found in <buildprj>/export/images and
+The files in below example can be found in tmp-glibc/deploy/images/nxp-imx7/
 are copied to the export directory of the TFTP server.
 
 4.2.2 Download kernel
 ---------------------
 
-	# tftp 0x80800000 nxp-imx7-zImage-x.x.x.x_kernel_type
+	# tftp 0x80800000 zImage-nxp-imx7.bin
 
 4.2.3 Download dtb
 ------------------
 
-	# tftp 0x83000000 nxp-imx7-xxxxxx.dtb-x.x.x.x_kernel_type
+	# tftp 0x83000000 zImage-imx7d-sdb.dtb
 
 4.2.4 Set bootargs and boot system
 ----------------------------------
