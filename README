@@ -169,8 +169,25 @@ The following command will copy the kernel image to the first partition SD/MMC c
 	# cp -rf nxp-imx7-zImage-x.x.x.x_kernel_type /mnt/sd
 	# cp -rf nxp-imx7-imx7d-sdb.dtb-x.x.x.x_kernel_type /mnt/sd
 
+4.1.4. Creating Partitioned Images(WIC)
+=======================================
 
-4.1.4 Load kernel from MMC/SD to memory
+You can use the OpenEmbedded Image Creator, wic, to create a properly
+partitioned image on an SD card. The wic command generates partitioned images 
+from existing OpenEmbedded build artifacts.
+For more information about WIC, see:
+
+http://www.yoctoproject.org/docs/2.2/mega-manual/mega-manual.html#creating-partitioned-images
+
+This BSP supports SD card disk images.
+After building the project, you will have a WIC image under the directory
+tmp-glibc/deploy/images/<bsp name>/, for example:
+
+tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-glibc-<rootfs_type>-nxp-imx7.wic
+
+You can then write the output image to an SD card.
+
+4.1.5 Load kernel from MMC/SD to memory
 ---------------------------------------
 Note: all commands in this section are executed in u-boot command line.
 
@@ -194,7 +211,7 @@ Then load the dtb and kernel image from the activated MMC/SD card:
 	# fatload mmc $disk:1 0x80800000 nxp-imx7-zImage-x.x.x.x_kernel_type
 	# fatload mmc $disk:1 0x83000000 ${fdt_file}
 
-4.1.5 Set bootargs and boot system
+4.1.6 Set bootargs and boot system
 ----------------------------------
 
 	# setenv bootargs console=ttymxc0,115200 root=/dev/mmcblk{N}p${M} rw \
