@@ -368,7 +368,7 @@ via the following steps:
 
 Simply including in your configure line as follows:
 
-	--enable-kernel=standard+features/iwlwifi/iwlwifi.scc
+	echo "KERNEL_FEATURES_append = \" features/iwlwifi/iwlwifi.scc\"" >> conf/local.conf
 
 This will include the iwlwifi and mac80211 kernel modules in
 the root filesystem.
