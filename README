@@ -390,6 +390,64 @@ Execute the following commands to validate WiFi cards:
 
 Note, the PCIe driver so far does not support hotplug and suspend/resume.
 
+5.9 WiFi
+--------
+
+Because the LICENSE problem, we can't provide the firmware files in wrlinux,
+You can get these firmware files from imx7d SDK4.9 rootfs: /lib/firmware/bcm/ZP_BCM4339
+or you can contact with Murata in the web https://wireless.murata.com/
+
+We validated the WiFi module by the firmware version:
+	wl0: Nov 30 2016 10:55:12 version 6.37.39.55 (r663021)
+
+
+5.9.1 WiFi client mode
+----------------------
+
+	# update /etc/wpa_supplicant.conf
+	network={
+	  scan_ssid=1
+	  ssid="$essid"
+	  psk="$passwd"
+	}
+
+	# wpa_supplicant -i wlan0 -D nl80211 -c /etc/wpa_supplicant.conf -B
+	# dhclient wlan0
+	# ping <AP address> -i wlan0 -c 1
+
+5.9.2 WiFi AP mode
+------------------
+
+	# update your dhcpd in /etc/dhcp/dhcpd.conf:
+	subnet 192.168.0.0 netmask 255.255.255.0 {
+		option routers 192.168.0.1;   # default gateway
+		option domain-name-servers xxx.xxx.xxx.xxx;   # IP address of the DNS server
+		option subnet-mask 255.255.255.0;   # netmask assigned to clients
+		range 192.168.0.0 192.168.0.24;   # pool of the addresses to lease
+	}
+
+	# update your wpa_supplicant.conf in /etc/wpa_supplicant.conf
+	network={
+		ssid="test"
+		psk="12345678"
+		scan_ssid=1
+		proto=RSN
+		key_mgmt=WPA-PSK
+		group=CCMP TKIP
+		pairwise=CCMP TKIP
+		priority=5
+		mode=2
+	}
+
+	# echo 2 > /sys/module/bcmdhd/parameters/op_mode
+	# ifconfig wlan0 192.168.0.1 netmask 255.255.255.0
+	# wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+	# dhcpd -cf /etc/dhcp/dhcpd.conf -f wlan0 &
+	# echo "1" > /proc/sys/net/ipv4/ip_forward
+	# iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE
+	# route add default gw $gateway
+	# connect this wifi host
+
 6. kexec/kdump
 ==============
 
