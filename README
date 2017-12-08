@@ -33,28 +33,22 @@ herein. All rights not licensed by Wind River are reserved by Wind River.
 Source code included in tree for individual recipes is under the LICENSE
 stated in each recipe (.bb file) unless other stated.
 
-2. BSP Kernel and RootFS Combination
-====================================
+2. BSP Kernel and Distros
+=========================
 
-The validity of WindRiver Linux kernel and RootFS combination for this BSP is
-in the table.
-The leftmost column of the table is the kernel type, and the top line is the
-RootFS type.
-'Y' in each content cell stands for the combination is supported; 'N' stands
-for not supported:
+The following table summarizes the valid Wind River Linux distros for this BSP.
+'Y' in each content cell stands for supported; 'N' stands for not supported:
 
---------------------------------------------------------------------
-| kernel/rootfs | glibc_std | glibc_small | glibc_cgl | glibc_tiny |
---------------------------------------------------------------------
-|   standard    |     Y     |      Y      |     N     |     N      |
---------------------------------------------------------------------
-|   preempt_rt  |     N     |      N      |     N     |     N      |
---------------------------------------------------------------------
-|   cgl         |     N     |      N      |     N     |     N      |
---------------------------------------------------------------------
+  +--------------+-------------+-------------+-------------+
+  | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-ovp |
+  +--------------+-------------+-------------+-------------+
+  |    valid     |      Y      |      Y      |      N      |
+  +--------------+-------------+-------------+-------------+
 
-Note: with regard to the kernel and RootFS type, please refer to WindRiver Linux
-specification for details.
+For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
+by running 'bitbake -e | grep "^TARGET_SUPPORTED_KTYPES"'.
+
+Note: The preempt-rt ktype is not available for this BSP/Machine at this time.
 
 3. Board Specific Patches
 =========================
