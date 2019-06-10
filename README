@@ -1,7 +1,8 @@
-i.MX7D Sabre Board Support Package
+        i.MX7D Sabre Board Support Package
 
 1. About this document
 ======================
+
 This document describes common and non-hardware specific information.
 Please refer to README.hardware for hardware specific information.
 
@@ -23,15 +24,30 @@ is done automatically when using the Wind River configure wrapper.
 
 License
 -------
-Copyright (C) 2017 Wind River Systems, Inc.
+Copyright (C) 2019 Wind River Systems, Inc.
 
-The right to copy, distribute or otherwise make use of this software may
-be licensed only pursuant to the terms of an applicable Wind River license
-agreement. No license to Wind River intellectual properly rights is granted
-herein. All rights not licensed by Wind River are reserved by Wind River.
+Source code included in the tree for individual recipes is under the LICENSE
+stated in the associated recipe (.bb file) unless otherwise stated.
 
-Source code included in tree for individual recipes is under the LICENSE
-stated in each recipe (.bb file) unless other stated.
+The metadata is under the following license unless otherwise stated.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
 
 2. BSP Kernel and Distros
 =========================
@@ -42,7 +58,7 @@ The following table summarizes the valid Wind River Linux distros for this BSP.
   +--------------+-------------+-------------+-------------+
   | valid/distro |   wrlinux   | wrlinux-cgl | wrlinux-ovp |
   +--------------+-------------+-------------+-------------+
-  |    valid     |      Y      |      Y      |      N      |
+  |    valid     |      Y      |      N      |      N      |
   +--------------+-------------+-------------+-------------+
 
 For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
@@ -52,8 +68,9 @@ Note: The preempt-rt ktype is not available for this BSP/Machine at this time.
 
 3. Board Specific Patches
 =========================
-To get a list of patches applied to the kernel specific to this BSP along
-with patch descriptions use git-whatchanged on the default kernel. For example:
+To get a list of patches applied to the kernel specific to this BSP,
+along with patch descriptions, use git to see what changed on the default
+kernel (git whatchanged <kernel_type>..<bsp_name>). For example:
 
 	# cd tmp-glibc/work-shared/nxp-imx7/kernel-source
 	# git whatchanged standard/base..
@@ -64,288 +81,60 @@ with patch descriptions use git-whatchanged on the default kernel. For example:
 
 4.1 MMC/SD Boot
 ---------------
+User can use the OpenEmbedded Image Creator, wic, to create the properly
+partitioned image on a SD card. The wic command
+generates partitioned images from existing OpenEmbedded build artifacts.
+User can refer to the below URL to get more WIC details:
 
-4.1.1 Create partitions
------------------------
-You can use bootloader/create-sdcard.sh to fastly create partitions:
+https://www.yoctoproject.org/docs/2.6/mega-manual/mega-manual.html#creating-partitioned-images-using-wic
 
-	sudo ./create-sdcard.sh /dev/${your sdcard}
+This BSP supports disk images for SD card.
+After build the project, user will get a WIC image under the directory
+tmp-glibc/deploy/images/<bsp name>/ ,such as:
 
-Or you can manually create partitions as follow:
+tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-glibc-std-nxp-imx7.wic
+tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-glibc-std-sato-nxp-imx7.wic
 
-(1) To identify the device node assigned to the SD/MMC card, enter the command:
-
-	# cat /proc/partitions
-	major minor	  #blocks name
-	8	0	 78125000 sda
-	8	1	 75095811 sda1
-	8	2	        1 sda2
-	8	5	  3028221 sda5
-	8	32	488386584 sdc
-	8	33	488386552 sdc1
-	8	16	  3921920 sdb
-	8	18	  3905535 sdb1
-
-In this example, the device node assigned is /dev/sdb.
-
-(2) Create partitions on the MMC/SD card.
-
-Run the following shell script with sudo to create a partition,
-you need umount your sdcard if it has been mount.
-
-	#!/bin/bash
-
-	#please input you sdcard device name, for example /dev/sdb
-	DRIVE=""
-
-	dd if=/dev/zero of=$DRIVE bs=1024 count=1024
-	sfdisk -u S -L $DRIVE << EOF
-        1000,144522,0x0C,*
-        160650,,,-
-	EOF
-
-Suppose the device node for MMC/SD card on the host machine is /dev/sdb.
-
-Note: The first 8MB can be reserved for MBR, bootloader, and kernel sections,
-the rootfs partition should be located after kernel image.
-
-(3) Create a filesystem on the first partition.
-
-Format it with vfat:
-
-	# mkfs.vfat /dev/sdb1
-
-(4) Create a filesystem on the second partition.
-
-Format it with one of the most popular filesystem types supported by Linux,
-for instance, ext3.
-
-	# mkfs.ext3 /dev/sdb2
-
-4.1.2 Decompress MMC/SD root filesystem
----------------------------------------
-
-mount it and deploy the root filesystem image there:
-
-	# mkdir /mnt/sd
-	# mount /dev/sdb2 /mnt/sd
-	# cd <buildprj>/tmp-glibc/deploy/images/nxp-imx7/
-	# tar -C /mnt/sd -jxf wrlinux-image-glibc-std-nxp-imx7.tar.bz2 --numeric-owner
-
-
-4.1.3 Deploy u-boot, dtb and kernel to SD/MMC
-----------------------------------------------
-
-(1) Copying the Boot Loader Image
-
-Enter the following command to copy the U-Boot image to the SD/MMC card:
-
-	# sudo dd if=u-boot.bin-sd of=/dev/sdb bs=512 seek=2 conv=fsync
-
-This assumes a pre-build U-Boot image delivered with the BSP or built from
-the U-Boot source code. The first 1 KB of the SD/MMC card, that includes
-the partition table, will be preserved.
-
-The boot modes of the board are controlled by the boot configuration
-DIP switches. To locate the boot configuration switches, see the
-section 4.3.1 of the README.hardware
-
-(2) Copying the Kernel Image and dtb to the SD/MMC
-
-The following command will copy the kernel image to the first partition SD/MMC card:
-
-	# mkdir /mnt/sd
-	# mount -t vfat /dev/sdb1 /mnt/sd
-	# cd <buildprj>/export/
-	# cp -rf zImage-nxp-imx7.bin /mnt/sd
-	# cp -rf zImage-imx7d-sdb.dtb /mnt/sd
-
-4.1.4. Creating Partitioned Images(WIC)
-=======================================
-
-You can use the OpenEmbedded Image Creator, wic, to create a properly
-partitioned image on an SD card. The wic command generates partitioned images 
-from existing OpenEmbedded build artifacts.
-For more information about WIC, see:
-
-http://www.yoctoproject.org/docs/2.2/mega-manual/mega-manual.html#creating-partitioned-images
-
-This BSP supports SD card disk images.
-After building the project, you will have a WIC image under the directory
-tmp-glibc/deploy/images/<bsp name>/, for example:
-
-tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-glibc-<rootfs_type>-nxp-imx7.wic
-
-You can then write the output image to an SD card.
-
-4.1.5 Load kernel from MMC/SD to memory
----------------------------------------
-Note: all commands in this section are executed in u-boot command line.
-
-Set the active mmc card and partition.
-
-	# mmc dev $disk[:$partition]
-
-For example:
-	# mmc dev 0		/* Activate the mmc0 card */
-
-
-Note that the partition is an optional argument since not all cards can
-support partitions. If your card does not have this capability, do not add
-the partition argument into the command. Currently there is no simple
-non-runtime way to determine if a card supports partitions or not.
-
-
-Then load the dtb and kernel image from the activated MMC/SD card:
-
-	# mmc rescan
-	# fatload mmc $disk:1 0x80800000 zImage-nxp-imx7.bin
-	# fatload mmc $disk:1 0x83000000 zImage-imx7d-sdb.dtb
-
-4.1.6 Set bootargs and boot system
-----------------------------------
-
-	# setenv bootargs console=ttymxc0,115200 root=/dev/mmcblk{N}p${M} rw \
-		 rootwait video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24
-	# bootz
-
-In the bootargs root=/dev/mmcblk{N}p${M}, Both N and M describe the disk
-number and partition number.
-
+Then user can write the output image to a SD card.
 
 4.2 NFS Root File System
 ------------------------
 
 4.2.1 Prepare Kernel, DTB, NFS and TFTP servers
 -----------------------------------------------
-The files in below example can be found in tmp-glibc/deploy/images/nxp-imx7/
-are copied to the export directory of the TFTP server.
+The files in the following example can be found in <buildprj>/tmp-glibc/deploy/images/nxp-imx7
+and are copied to the export directory of the TFTP server.
 
 4.2.2 Download kernel
 ---------------------
 
-	# tftp 0x80800000 zImage-nxp-imx7.bin
+	# tftp ${loadaddr} zImage
 
-4.2.3 Download dtb
+4.2.3 Download DTB
 ------------------
 
-	# tftp 0x83000000 zImage-imx7d-sdb.dtb
+	# tftp ${fdt_addr} imx7d-sdb.dtb
 
-4.2.4 Set bootargs and boot system
-----------------------------------
-
-	Note, the spi NOR flash, emmc and NAND flash are not soldered onto the board.
-	Please refer to imx7d sabre Board hardware user's guide for information
-	about how to use them.
+4.2.4 Set bootargs and boot the system
+--------------------------------------
 
 	# setenv bootargs console=ttymxc0,115200 root=/dev/nfs rw \
 		 nfsroot=<nfs server>:<nfs root>,v3,tcp \
-		 ip=<target IP>::<gateway>:<netmask>::eth0:off \
-		 video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24
-	# bootz 0x80800000 - 0x83000000
+		 ip=<target IP>::<gateway>:<netmask>::eth0:off
+	# bootz ${loadaddr} - ${fdt_addr}
 
 5. Features
 ===========
 
-5.1 fbdev HDMI
---------------
-
-To enable HDMI as the default framebuffer device, please add:
-
-	video=mxcfb0:dev=hdmi,1920x1080M@60,if=RGB24
-
-in the bootargs parameter of u-boot.
-
-5.2 USB feature
----------------
-
-5.2.1 USB OTG Usage and verification
-------------------------------------
-
-1. Verify the OTG device mode
-
-Plug in B cable and connect to the host machine.
-
-board configure:
-
-	# ifconfig usb0 192.168.1.10
-
-Host machine configure:
-
-	# sudo ifconfig usb0 192.168.1.100
-	# ping 192.168.1.10 -c 2
-	PING 192.168.1.10 (192.168.1.10) 56(84) bytes of data.
-	64 bytes from 192.168.1.10: icmp_req=1 ttl=64 time=2.06 ms
-	64 bytes from 192.168.1.10: icmp_req=2 ttl=64 time=0.286 ms
-	...
-
-2. Switch to the OTG host mode
-
-Replace the B cable with the A cable.
-
-5.3 Audio
----------
-
-5.3.1 Audio capture and playback(WM8962)
-----------------------------------------
-
-1. Capture
-
-Set the parameter to fit the codec and then record audio messages:
-
-	# amixer set 'MIXINR IN3R' on
-	# amixer set 'INPGAR IN3R' on
-
-2. Playback
-
-	# amixer cset name='Headphone Volume' 127
-
-5.3.2 Audio HDMI playback
--------------------------
-
-Connect the board and a HDMI display with a HDMI cable,
-then enable fbdev HDMI as in 4.1 section.
-
-Play the recorded audio messages:
-
-	# aplay -Dhw:1,0 record.wav
-
-5.4 Static PM
+5.1 Static PM
 -------------
 
 The debug UART can be set as a wakeup source with:
 	# echo enabled > /sys/class/tty/ttymxc0/power/wakeup
 	# echo mem > /sys/power/state
 
-5.5 CPU frequency
-------------------
 
-The CPU frequency scaling allows the clock speed of the CPU to be
-changed on the fly.
-
-	# echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-	# cat /proc/cpuinfo
-
-5.6 Backlight
---------------
-
-	# echo 1~7 > /sys/class/backlight/backlight/brightness
-
-5.7 ANATOP thermal
--------------------
-
-	To check current CPU temperature
-	# cd /sys/class/thermal/thermal_zone0
-	# cat temp
-	39000
-	# cat trip_point_0_type
-	passive
-	# cat trip_point_0_temp
-	85000
-	# echo 38500 > trip_point_0_temp
-	the number of "imx_thermal" interrupt will be increased
-
-5.8 PCIe
+5.2 PCIe
 --------
 
 Since the PCIe connector on-board only exports PETP0/N0, PERP0/N0 and 3.3V
@@ -355,89 +144,18 @@ The following PCIe peripherals are validated:
 	Intel Centrino Advanced-N 6205
 	Intel Centrino Wireless-N 1030
 
-via the following steps:
+The PCIe driver does not support hotplug and suspend/resume.
 
-Simply including in your configure line as follows:
-
-	echo "KERNEL_FEATURES_append = \" features/iwlwifi/iwlwifi.scc\"" >> conf/local.conf
-
-This will include the iwlwifi and mac80211 kernel modules in
-the root filesystem.
-
-Make the consistency for them(Built and install)
-
-	# make -C build wireless-tools.addpkg
-	# make fs
-
-Copy relevant firmware(Intel 6205 WiFi firmware: iwlwifi-6000g2a-5.ucode)
-of WiFi cards into /lib/firmware of target rootfs.
-
-Execute the following commands to validate WiFi cards:
-
-	# ifconfig wlan0 up
-	# iwconfig wlan0 essid <AP essid>
-	# dhclient wlan0
-	# ping <AP address> -i wlan0 -c 1
-
-Note, the PCIe driver so far does not support hotplug and suspend/resume.
-
-5.9 WiFi
+5.3 WiFi
 --------
 
-Because the LICENSE problem, we can't provide the firmware files in wrlinux,
-You can get these firmware files from imx7d SDK4.9 rootfs: /lib/firmware/bcm/ZP_BCM4339
+Due to the LICENSE issue, we can't provide the firmware files in wrlinux,
+You can get these firmware files from imx7d SDK v4.14.78 rootfs: /lib/firmware/brcm/
+brcmfmac4339-sdio.bin & brcmfmac4339-sdio.txt
 or you can contact with Murata in the web https://wireless.murata.com/
 
 We validated the WiFi module by the firmware version:
-	wl0: Nov 30 2016 10:55:12 version 6.37.39.55 (r663021)
-
-
-5.9.1 WiFi client mode
-----------------------
-
-	# update /etc/wpa_supplicant.conf
-	network={
-	  scan_ssid=1
-	  ssid="$essid"
-	  psk="$passwd"
-	}
-
-	# wpa_supplicant -i wlan0 -D nl80211 -c /etc/wpa_supplicant.conf -B
-	# dhclient wlan0
-	# ping <AP address> -i wlan0 -c 1
-
-5.9.2 WiFi AP mode
-------------------
-
-	# update your dhcpd in /etc/dhcp/dhcpd.conf:
-	subnet 192.168.0.0 netmask 255.255.255.0 {
-		option routers 192.168.0.1;   # default gateway
-		option domain-name-servers xxx.xxx.xxx.xxx;   # IP address of the DNS server
-		option subnet-mask 255.255.255.0;   # netmask assigned to clients
-		range 192.168.0.0 192.168.0.24;   # pool of the addresses to lease
-	}
-
-	# update your wpa_supplicant.conf in /etc/wpa_supplicant.conf
-	network={
-		ssid="test"
-		psk="12345678"
-		scan_ssid=1
-		proto=RSN
-		key_mgmt=WPA-PSK
-		group=CCMP TKIP
-		pairwise=CCMP TKIP
-		priority=5
-		mode=2
-	}
-
-	# echo 2 > /sys/module/bcmdhd/parameters/op_mode
-	# ifconfig wlan0 192.168.0.1 netmask 255.255.255.0
-	# wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
-	# dhcpd -cf /etc/dhcp/dhcpd.conf -f wlan0 &
-	# echo "1" > /proc/sys/net/ipv4/ip_forward
-	# iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE
-	# route add default gw $gateway
-	# connect this wifi host
+	BCM4339/2 wl0: Feb  7 2018 06:16:29 version 6.37.39.92 (r683655 CY)
 
 6. kexec/kdump
 ==============

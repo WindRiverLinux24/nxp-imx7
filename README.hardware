@@ -19,7 +19,8 @@ This BSP supports the following boards:
 
 2. Change History
 =================
-  - 2017/11 (US102575): WRLinux 10.0 , support I.MX7D SABRE based on FSL IMX SDK v4.9.15
+  - 2019/07 (LINUXPG-18): Wind River Linux10.18 RCPL06, , support I.MX7D SABRE
+                          based on FSL IMX SDK v4.14.78
 
 3. BSP Features
 ===============
@@ -31,7 +32,6 @@ This BSP supports the following features.
 
   o General Platform
 	+ KGDBoC
-	+ OProfile (timer mode)
 
   o Bus
 	+ I2C: On-Chip I2C controller
@@ -42,7 +42,7 @@ This BSP supports the following features.
 	+ Ethernet: FEC 10/100/1000 MAC ethernet controller, BCM54220B0KFBG external PHY
 	+ IEEE 1588: based on FEC controller
 	+ CAN: FLEXCAN, Flexible controller area network
-	+ WIFI/BT: LBEH5HMZPC-TEMP
+	+ WIFI: LBEH5HMZPC-TEMP
 
   o USB
 	+ USB Host: 1 EHCI compatible host controller in the chip
@@ -50,17 +50,12 @@ This BSP supports the following features.
 
   o Storage
 	+ SD/MMC: On-Chip ultra secured digital host controller (uSDHC)
-	+ eMMC: On-chip embedded multimediacard, 1bit/4bit/8bit SDR/DDR mode
-	+ NOR Flash: 64MB mx25l51245g SPI NOR Flash (need HW rework, refer in imx7dsabre SCH)
 
   o User_Interface_Multimedia
 	+ AUDIO:
 		+ HDMI codec 
 		+ WM8960 codec
 
-	+ Touchscreen: EGALAX touchscreen controller connected via i2C
-	+ Parallel LCD Display
-	+ Backlight
 	+ HDMI: On-Chip HDMI controller
 
   o Power Mgmt
@@ -97,6 +92,7 @@ The following features are not supported and validated:
 	x MIPI-CSI CMOS sensor
 	x EPDC
 	x MikroBUS
+	x BT: LBEH5HMZPC-TEMP
 
 4. BSP Notes
 ============
@@ -115,15 +111,11 @@ NOTE: This BSP is only validated in the following environment, if used in a
 different environment it may run into unknown issues.
 
 IMX7D SABRE:
-	CPU:   Freescale i.MX7D rev1.2 996 MHz (running at 792 MHz)
-	CPU:   Commercial temperature grade (0C to 95C) at 32C
-	Reset cause: POR
-	Board: i.MX7D SABRESD RevD
-	BootLoader Version:    U-Boot 2016.03-imx_v2016.03_4.1.15_2.0.0_ga+g0ec2a01 (Mar 13 2017 - 17:27:26 +0800)
-
-Note:
-  If the board's u-boot could not support dtb, please refer to bootloader/README
-to update u-boot.
+  CPU:   Freescale i.MX7D rev1.2 1000 MHz (running at 792 MHz)
+  CPU:   Commercial temperature grade (0C to 95C) at 41C
+  Model: Freescale i.MX7 SabreSD Board
+  Board: i.MX7D SABRESD RevA in secure mode
+  BootLoader Version:   U-Boot 2018.03-imx_v2018.03_4.14.78_1.0.0_ga+g654088cc21
 
 4.3 Specify boot medium
 -----------------------
@@ -135,8 +127,3 @@ to update u-boot.
 
 Switch	D1   D2   D3   D4   D5   D6   D7   D8
 SW2	OFF  OFF  ON   OFF  OFF  OFF  ON   OFF
-
-Note:
-Booting from qspi, emmc and NDAD isn't supported in default, it need HW reword, for summary information,
-please refer the board schematics
-
