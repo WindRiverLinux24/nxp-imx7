@@ -19,8 +19,8 @@ This BSP supports the following boards:
 
 2. Change History
 =================
-  - 2019/07 (LINUXPG-18): Wind River Linux10.18 RCPL06, , support I.MX7D SABRE
-                          based on FSL IMX SDK v4.14.78
+  - 2022/11 (LINUXPG-1139): Wind River Linux10.22 RCPL04, support I.MX7D SABRE
+                          based on FSL IMX SDK v5.15.32
 
 3. BSP Features
 ===============
@@ -115,7 +115,7 @@ IMX7D SABRE:
   CPU:   Commercial temperature grade (0C to 95C) at 41C
   Model: Freescale i.MX7 SabreSD Board
   Board: i.MX7D SABRESD RevA in secure mode
-  BootLoader Version:   U-Boot 2018.03-imx_v2018.03_4.14.78_1.0.0_ga+g654088cc21
+  BootLoader Version:   U-Boot 2021.04-lf_v2021.04+gf7b43f8b4c (Mar 01 2022 - 07:31:56 +0000)
 
 4.3 Specify boot medium
 -----------------------

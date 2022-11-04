@@ -24,7 +24,7 @@ is done automatically when using the Wind River configure wrapper.
 
 License
 -------
-Copyright (C) 2019 Wind River Systems, Inc.
+Copyright (C) 2022 Wind River Systems, Inc.
 
 Source code included in the tree for individual recipes is under the LICENSE
 stated in the associated recipe (.bb file) unless otherwise stated.
@@ -150,7 +150,7 @@ The PCIe driver does not support hotplug and suspend/resume.
 --------
 
 Due to the LICENSE issue, we can't provide the firmware files in wrlinux,
-You can get these firmware files from imx7d SDK v4.14.78 rootfs: /lib/firmware/brcm/
+You can get these firmware files from imx7d SDK v5.15.32 rootfs: /lib/firmware/brcm/
 brcmfmac4339-sdio.bin & brcmfmac4339-sdio.txt
 or you can contact with Murata in the web https://wireless.murata.com/
 
