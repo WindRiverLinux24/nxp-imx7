@@ -187,6 +187,18 @@ or you can contact with Murata in the web https://wireless.murata.com/
 We validated the WiFi module by the firmware version:
 	BCM4339/2 wl0: Feb  7 2018 06:16:29 version 6.37.39.92 (r683655 CY)
 
+5.7 CAAM
+--------
+
+Running OpenSSL benchmarking tests with AF_ALG engine:
+
+root@nxp-imx7:~# modprobe algif_hash
+root@nxp-imx7:~# modprobe algif_skcipher
+root@nxp-imx7:~# modprobe algif_rng
+root@nxp-imx7:~# modprobe algif_aead
+root@nxp-imx7:~# openssl speed -engine afalg -multi 8 -elapsed -evp aes-128-cbc
+
+
 6. kexec/kdump
 ==============
 
