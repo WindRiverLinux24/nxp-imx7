@@ -133,8 +133,38 @@ The debug UART can be set as a wakeup source with:
 	# echo enabled > /sys/class/tty/ttymxc0/power/wakeup
 	# echo mem > /sys/power/state
 
+5.2 CPU frequency
+------------------
 
-5.2 PCIe
+CPU frequency scaling allows the clock speed of the CPU to be changed on the fly.
+
+	# echo powersave > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+	# cat /proc/cpuinfo
+
+5.3 ANATOP thermal
+-------------------
+
+	To check current CPU temperature
+	# cd /sys/class/thermal/thermal_zone0
+	# cat temp
+	39821
+	# cat trip_point_0_type
+	passive
+	# cat trip_point_0_temp
+	95000
+
+5.4 Audio
+---------
+Play audio messages:
+
+For imx7d, enable Output Mixer PCM like the following:
+amixer sset 'Right Output Mixer PCM' on
+amixer sset 'Left Output Mixer PCM' on
+
+	# aplay -Dhw:0,0 stereo1644s.wav
+
+
+5.5 PCIe
 --------
 
 Since the PCIe connector on-board only exports PETP0/N0, PERP0/N0 and 3.3V
@@ -146,7 +176,7 @@ The following PCIe peripherals are validated:
 
 The PCIe driver does not support hotplug and suspend/resume.
 
-5.3 WiFi
+5.6 WiFi
 --------
 
 Due to the LICENSE issue, we can't provide the firmware files in wrlinux,
