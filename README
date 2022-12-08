@@ -64,7 +64,7 @@ The following table summarizes the valid Wind River Linux distros for this BSP.
 For the supported kernel type for this BSP, please check the TARGET_SUPPORTED_KTYPES
 by running 'bitbake -e virtual/kernel | grep "^TARGET_SUPPORTED_KTYPES="'.
 
-Note: The preempt-rt ktype is not available for this BSP/Machine at this time.
+Note: The preempt-rt ktype is available for this BSP/Machine at this time.
 
 3. Board Specific Patches
 =========================
@@ -86,14 +86,13 @@ partitioned image on a SD card. The wic command
 generates partitioned images from existing OpenEmbedded build artifacts.
 User can refer to the below URL to get more WIC details:
 
-https://www.yoctoproject.org/docs/2.6/mega-manual/mega-manual.html#creating-partitioned-images-using-wic
+https://docs.yoctoproject.org/4.0.5/dev-manual/common-tasks.html#creating-partitioned-images-using-wic
 
 This BSP supports disk images for SD card.
 After build the project, user will get a WIC image under the directory
 tmp-glibc/deploy/images/<bsp name>/ ,such as:
 
-tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-glibc-std-nxp-imx7.wic
-tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-glibc-std-sato-nxp-imx7.wic
+tmp-glibc/deploy/images/nxp-imx7/wrlinux-image-std-nxp-imx7.wic
 
 Then user can write the output image to a SD card.
 
@@ -211,7 +210,7 @@ capture kernel - the kernel that you reboot into after a boot kernel crash
 To build the boot kernel, use the following configure option to configure
 the project:
 
-     --with-template=feature/kexec,feature/kdump
+     --templates feature/kdump feature/kexec
 
 To reserve a memory region for capture kernel, you need to pass the bootargs argument "crashkernel"
 as follow:
@@ -221,7 +220,7 @@ as follow:
 For dump-capture kernel:
 Before boot dump-capture kernel, please add "maxcpus=1" to the boot parameter.
 Note: please use zImage as a secondary kernel. It can be found in the
-  build/linux-windriver/4.1-r0/linux-nxp_imx7-standard-build/arch/arm/boot
+  tmp-glibc/deploy/images/nxp-imx7/
 directory.
 
 For more detailed info about kdump, please refer to Documentation/kdump/kdump.txt
