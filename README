@@ -122,6 +122,8 @@ and are copied to the export directory of the TFTP server.
 		 ip=<target IP>::<gateway>:<netmask>::eth0:off
 	# bootz ${loadaddr} - ${fdt_addr}
 
+Note: for MCIMX7D-SDB board, $loadaddr="0x80800000", $fdt_addr="0x87000000"
+
 5. Features
 ===========
 
