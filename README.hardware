@@ -30,9 +30,6 @@ This BSP supports the following boards:
 
 This BSP supports the following features.
 
-  o General Platform
-	+ KGDBoC
-
   o Bus
 	+ I2C: On-Chip I2C controller
 	+ PCIe: On-Chip PCIe controller
