@@ -118,7 +118,7 @@ and are copied to the export directory of the TFTP server.
 --------------------------------------
 
 	# setenv bootargs console=ttymxc0,115200 root=/dev/nfs rw \
-		 nfsroot=<nfs server>:<nfs root>,v3,tcp \
+		 nfsroot=<nfs server>:<nfs root> \
 		 ip=<target IP>::<gateway>:<netmask>::eth0:off
 	# bootz ${loadaddr} - ${fdt_addr}
 
