@@ -81,7 +81,7 @@ This BSP supports the following features.
 3.3 Unsupported Features
 ========================
 
-The following features are not supported and validated:
+The following features are not supported and not validated:
 
 	x ESAI card
 	x CortexM4
