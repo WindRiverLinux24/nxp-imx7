@@ -19,8 +19,8 @@ This BSP supports the following boards:
 
 2. Change History
 =================
-  - 2023/09 (LINUXPG-1139): Wind River Linux10.23 RCPL03, support I.MX7D SABRE
-                          based on FSL IMX SDK v6.1
+    - 2024/12 (LINUXPG-2454): Wind River Linux10.24 RCPL04, support I.MX7D SABRE
+			      based on FSL IMX SDK v6.6
 
 3. BSP Features
 ===============
