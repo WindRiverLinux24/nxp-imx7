@@ -112,7 +112,7 @@ IMX7D SABRE:
   CPU:   Commercial temperature grade (0C to 95C) at 41C
   Model: Freescale i.MX7 SabreSD Board
   Board: i.MX7D SABRESD RevA in secure mode
-  BootLoader Version:   U-Boot 2022.04-lf_v2022.04+g7376547b9e (Mar 01 2023 - 07:35:40 +0000)
+  BootLoader Version:   U-Boot 2024.04-lf_v2024.04+gde16f4f1+p0 (Sep 02 2024 - 10:44:35 +0000)
 
 4.3 Specify boot medium
 -----------------------
