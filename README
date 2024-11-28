@@ -159,10 +159,10 @@ CPU frequency scaling allows the clock speed of the CPU to be changed on the fly
 Play audio messages:
 
 For imx7d, enable Output Mixer PCM like the following:
-amixer sset 'Right Output Mixer PCM' on
-amixer sset 'Left Output Mixer PCM' on
+amixer -c 1 sset 'Right Output Mixer PCM' on
+amixer -c 1 sset 'Left Output Mixer PCM' on
 
-	# aplay -Dhw:0,0 stereo1644s.wav
+	# aplay -Dhw:1,0 stereo1644s.wav
 
 
 5.5 PCIe
